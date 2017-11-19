@@ -1,0 +1,27 @@
+{
+    "dataRoles": [
+        {
+            "displayName": "Latitude",
+            "name": "latitude",
+            "kind": "Grouping"
+        },
+        {
+            "displayName": "Longitude",
+            "name": "longitude",
+            "kind": "Grouping"
+        },
+        {
+            "displayName": "Population",
+            "name": "population",
+            "kind": "Grouping"
+        }
+    ],
+    "dataViewMappings": [{   
+        "table": {
+                "rows": {
+                    "dataReductionAlgorithm": { "top": {"count": 20000 } }, "select": [{ "for": { "in": "latitude" }}, { "for": { "in": "longitude" }}, { "for": { "in": "population" }}]
+                }
+            }
+        }
+    ]
+}

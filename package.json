@@ -1,0 +1,10 @@
+{
+    "name": "latlongglobe",
+    "version": "1.0.0",
+    "author": "Jack Butts",
+    "license": "MIT",
+    "dependencies": {
+    "powerbi-visuals-utils-dataviewutils": "1.2.0",
+    "three": "^0.88.0"
+  }
+}
