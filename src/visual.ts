@@ -58,12 +58,6 @@ module powerbi.extensibility.visual {
 
         // convert the positions from a lat, lon to a position on a sphere.
         public latLongToVector3(lat : any, lon : any, radius : any, heigth : any) {
-            //var phi = (lat)*Math.PI/180;
-            //var theta = (lon-180)*Math.PI/180;
-            //var x = -(radius+heigth) * Math.cos(phi) * Math.cos(theta);
-            //var y = (radius+heigth) * Math.sin(phi);
-            //var z = (radius+heigth) * Math.cos(phi) * Math.sin(theta);
-    
             var cosLat = Math.cos(lat * Math.PI / 180.0);
             var sinLat = Math.sin(lat * Math.PI / 180.0);
             var cosLon = Math.cos(lon * Math.PI / 180.0);
@@ -72,6 +66,17 @@ module powerbi.extensibility.visual {
             var y = radius * cosLat * sinLon;
             var z = radius * sinLat;
             return new this.window.THREE.Vector3(x,y,z);
+        }
+
+        public findMedian(numbers : any[] ) {
+            var median = 0, numsLen = numbers.length;
+            numbers.sort();
+            if (numsLen % 2 === 0) {
+                median = (numbers[numsLen / 2 - 1] + numbers[numsLen / 2]) / 2;
+            } else {
+                median = numbers [(numsLen - 1) / 2];
+            }
+            return median;
         }
 
         public addDensity(options : VisualUpdateOptions) {
@@ -84,6 +89,8 @@ module powerbi.extensibility.visual {
             // material to use for each of our elements
             let cubeMat = new this.window.THREE.MeshLambertMaterial( {color: 0x000000, opacity: 0.6, emissive: 0xffffff });
             
+            // find median
+            let median = this.findMedian(pop);
             for (let i = 0; i < lat.length; i++) {
                 // calculate the position where we need to start the cube
                 //let position = this.latLongToVector3(((lat[i])-96*-1), (long[i]), 600, 2);
@@ -92,7 +99,7 @@ module powerbi.extensibility.visual {
                 let angle = Math.PI / 2;
                 position.applyAxisAngle(axis, angle);
                 // create the cube
-                let cubeBody = new this.window.THREE.Mesh(new this.window.THREE.CubeGeometry(5,5,1+pop[i]/10000,1,1,1,cubeMat));
+                let cubeBody =  new this.window.THREE.Mesh(new this.window.THREE.CubeGeometry(5,5,pop[i]/median,1,1,1,cubeMat));
                 // position the cube correctly
                 cubeBody.position.set(position.x, position.y, position.z);
                 cubeBody.lookAt( new this.window.THREE.Vector3(0,0,0));
