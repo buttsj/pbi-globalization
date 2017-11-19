@@ -1,13 +1,13 @@
 {
   "visual": {
-    "name": "latlongglobe",
-    "displayName": "Latitude/Longitude Globe",
+    "name": "pbi-globalization",
+    "displayName": "Globe Data Bars",
     "guid": "threejsE0E480FFE18F46FE90AD2FA3A0D80C5F",
     "visualClassName": "Visual",
     "version": "1.0.0",
-    "description": "",
-    "supportUrl": "",
-    "gitHubUrl": ""
+    "description": "A PowerBI visualization to show data through Latitudes and Longitudes",
+    "supportUrl": "https://www.dreameater.net",
+    "gitHubUrl": "https://github.com/buttsj/pbi-globalization"
   },
   "apiVersion": "1.8.0",
   "author": {
@@ -15,10 +15,7 @@
     "email": "JButts@bhsolutions.com"
   },
   "assets": {
-    "icon": "assets/icon.png",
-    "earthmap1k": "assets/earthmap1k.jpg",
-    "earthbump1k": "assets/earthbump1k.jpg",
-    "earthspec1k": "assets/earthspec1k.jpg"
+    "icon": "assets/icon.png"
   },
   "externalJS": [
     "node_modules/powerbi-visuals-utils-dataviewutils/lib/index.js"
