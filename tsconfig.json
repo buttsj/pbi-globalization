@@ -12,7 +12,7 @@
   "files": [
     ".api/v1.8.0/PowerBI-visuals.d.ts",
     "node_modules/powerbi-visuals-utils-dataviewutils/lib/index.d.ts",
-	  "node_modules/three/build/three.js",
+    "node_modules/three/build/three.js",
 	  "typings/index.d.ts",
     "src/visual.ts"
   ]

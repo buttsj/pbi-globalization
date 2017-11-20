@@ -26,18 +26,24 @@
 /// <amd-dependency path='three'>
 module powerbi.extensibility.visual {
     export class Visual implements IVisual {
-        
-        private total           : THREE.Mesh;
-        private earthImg        : any;
-        private canvas          : HTMLElement;
-        private camera          : THREE.PerspectiveCamera;
-        private scene           : THREE.Scene;
-        private renderer        : THREE.WebGLRenderer;
-        private light           : THREE.DirectionalLight;
-        private window          : any;
-        private POS_X           : any = 1800;
-        private POS_Y           : any = 500;
-        private POS_Z           : any = 1800;
+        private total                       : THREE.Mesh;
+        private earthImg                    : any;
+        private canvas                      : HTMLElement;
+        private camera                      : THREE.PerspectiveCamera;
+        private scene                       : THREE.Scene;
+        private renderer                    : THREE.WebGLRenderer;
+        private light                       : THREE.DirectionalLight;
+        private window                      : any;
+        private POS_X                       : any = 1800;
+        private POS_Y                       : any = 500;
+        private POS_Z                       : any = 1800;
+        private isDragging                  : boolean = false;
+        private mouseX                      : any = 0;
+        private mouseXOnMouseDown           : any = 0;
+        private targetRotation              : any = 0;
+        private targetRotationOnMouseDown   : any = 0;
+        private windowHalfX                 : any = window.innerWidth / 2;
+
         
         constructor(options: VisualConstructorOptions) {
             // store an instance of the window for unknown reasons (will error otherwise)
@@ -47,6 +53,7 @@ module powerbi.extensibility.visual {
             this.scene.background = new this.window.THREE.Color(0x111111);
             // make the rotating camera
             this.createCamera();
+            let controls = (<any>window).OrbitControls;
             // make the earth & clouds & lights
             this.createEarth();
             this.createLights();          
@@ -54,9 +61,37 @@ module powerbi.extensibility.visual {
             this.renderer = new this.window.THREE.WebGLRenderer();
             this.renderer.setSize( this.window.innerWidth, this.window.innerHeight);
             options.element.appendChild(this.renderer.domElement);
+            document.addEventListener('mousedown', this.onDocumentMouseDown, false );
         }
 
-        // convert the positions from a lat, lon to a position on a sphere.
+        onDocumentMouseDown = (event : any) => {
+            event.preventDefault();
+            document.addEventListener( 'mousemove', this.onDocumentMouseMove, false);
+            document.addEventListener( 'mouseup', this.onDocumentMouseUp, false);
+            document.addEventListener( 'mouseout', this.onDocumentMouseOut, false);
+            this.mouseXOnMouseDown = event.clientX - this.windowHalfX;
+            this.targetRotationOnMouseDown = this.targetRotation;
+        }
+
+        onDocumentMouseMove = (event : any) => {
+            this.mouseX = event.clientX - this.windowHalfX;
+            this.targetRotation = this.targetRotationOnMouseDown + (this.mouseX - this.mouseXOnMouseDown) * 0.02;
+            console.log(this.mouseX);
+            console.log(this.targetRotation);
+        }
+
+        onDocumentMouseUp = (event : any) => {
+            document.removeEventListener('mousemove', this.onDocumentMouseMove, false );
+            document.removeEventListener( 'mouseup', this.onDocumentMouseUp, false );
+            document.removeEventListener( 'mouseout', this.onDocumentMouseOut, false );
+        }
+
+        onDocumentMouseOut = (event : any) => {
+            document.removeEventListener('mousemove', this.onDocumentMouseMove, false );
+            document.removeEventListener( 'mouseup', this.onDocumentMouseUp, false );
+            document.removeEventListener( 'mouseout', this.onDocumentMouseOut, false );
+        }
+
         public latLongToVector3(lat : any, lon : any, radius : any, heigth : any) {
             var cosLat = Math.cos(lat * Math.PI / 180.0);
             var sinLat = Math.sin(lat * Math.PI / 180.0);
@@ -103,7 +138,6 @@ module powerbi.extensibility.visual {
                 // position the cube correctly
                 cubeBody.position.set(position.x, position.y, position.z);
                 cubeBody.lookAt( new this.window.THREE.Vector3(0,0,0));
-                //this.scene.add(cubeBody);
                 // merge with main model
                 cubeBody.updateMatrix();
                 mergedGeom.merge(cubeBody.geometry, cubeBody.matrix);
@@ -140,8 +174,9 @@ module powerbi.extensibility.visual {
         }
 
         public render() {
-            var timer = Date.now() * 0.0001;
-            this.camera.position.set((Math.cos( timer ) * 1800), this.camera.position.y, (Math.sin( timer ) * 1800));
+            //var timer = Date.now() * 0.0001;
+            //this.camera.position.set((Math.cos( timer ) * 1800), this.camera.position.y, (Math.sin( timer ) * 1800));
+            this.camera.rotation.y += (this.targetRotation - this.camera.rotation.y) * 0.05;
             this.camera.lookAt(new this.window.THREE.Vector3(0, 0, 0));
             this.light.position.set(this.camera.position.x, this.camera.position.y, this.camera.position.z);
             this.light.lookAt(new this.window.THREE.Vector3(0, 0, 0));
