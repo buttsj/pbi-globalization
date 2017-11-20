@@ -19,8 +19,11 @@ Jack Butts [Portfolio](https://www.dreameater.net)
 	* Builds globe and data bars at given lat/long location
     * Slowly rotates around the globe's axis
     * Data can be filtered by outside visualizations
+* v1.1
+    * Globe no longer auto-rotates
+    * Globe can be rotated with mouse click and drag
+    * Data is now scaled down by the median of the data set (easier to see all data bars on globe) 
 
 * Future features:
-    * Allow click-drag of globe
     * Allow click filtering on data bars
     * Show tooltips on data bars
