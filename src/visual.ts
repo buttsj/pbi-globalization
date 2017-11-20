@@ -26,20 +26,21 @@
 /// <amd-dependency path='three'>
 module powerbi.extensibility.visual {
     export class Visual implements IVisual {
-        private total                       : THREE.Mesh;
-        private earthImg                    : any;
-        private canvas                      : HTMLElement;
-        private camera                      : THREE.PerspectiveCamera;
-        private scene                       : THREE.Scene;
-        private renderer                    : THREE.WebGLRenderer;
-        private light                       : THREE.DirectionalLight;
-        private window                      : any;
-        private POS_X                       : any = 1800;
-        private POS_Y                       : any = 500;
-        private POS_Z                       : any = 1800;
-        private pivot                       : THREE.Object3D;
-        private mouseDown                   : boolean = false;
-        private mouseX                      : any = 0;
+        private total       : THREE.Mesh;
+        private earthImg    : any;
+        private canvas      : HTMLElement;
+        private camera      : THREE.PerspectiveCamera;
+        private scene       : THREE.Scene;
+        private renderer    : THREE.WebGLRenderer;
+        private light       : THREE.DirectionalLight;
+        private window      : any;
+        private POS_X       : any = 1800;
+        private POS_Y       : any = 500;
+        private POS_Z       : any = 1800;
+        private pivot       : THREE.Object3D;
+        private mouseDown   : boolean = false;
+        private mouseX      : any = 0;
+        private mouseY      : any = 0;
 
         constructor(options: VisualConstructorOptions) {
             // store an instance of the window for unknown reasons (will error otherwise)
@@ -63,6 +64,7 @@ module powerbi.extensibility.visual {
             event.preventDefault();
             this.mouseDown = true;
             this.mouseX = event.clientX;
+            this.mouseY = event.clientY;
             document.addEventListener( 'mousemove', this.onDocumentMouseMove, false);
             document.addEventListener( 'mouseup', this.onDocumentMouseUp, false);
             document.addEventListener( 'mouseout', this.onDocumentMouseOut, false);
@@ -74,8 +76,10 @@ module powerbi.extensibility.visual {
             }
             event.preventDefault();
             let deltaX = event.clientX - this.mouseX;
+            let deltaY = event.clientY - this.mouseY;
             this.mouseX = event.clientX;
-            this.rotateCamera(deltaX);
+            this.mouseY = event.clientY;
+            this.rotateCamera(deltaX, deltaY);
         }
 
         onDocumentMouseUp = (event : any) => {
@@ -94,8 +98,9 @@ module powerbi.extensibility.visual {
             document.removeEventListener( 'mouseout', this.onDocumentMouseOut, false );
         }
 
-        public rotateCamera(deltaX : any) {
+        public rotateCamera(deltaX : any, deltaY : any) {
             this.pivot.rotation.y -= deltaX / 100;
+            this.pivot.rotation.x -= deltaY / 100;
         }
 
         public latLongToVector3(lat : any, lon : any, radius : any, heigth : any) {
@@ -107,17 +112,6 @@ module powerbi.extensibility.visual {
             var y = radius * cosLat * sinLon;
             var z = radius * sinLat;
             return new this.window.THREE.Vector3(x,y,z);
-        }
-
-        public findMedian(numbers : any[] ) {
-            var median = 0, numsLen = numbers.length;
-            numbers.sort();
-            if (numsLen % 2 === 0) {
-                median = (numbers[numsLen / 2 - 1] + numbers[numsLen / 2]) / 2;
-            } else {
-                median = numbers [(numsLen - 1) / 2];
-            }
-            return median;
         }
 
         public getLength(number : any) {
@@ -134,20 +128,13 @@ module powerbi.extensibility.visual {
             // material to use for each of our elements
             let cubeMat = new this.window.THREE.MeshLambertMaterial( {color: 0x000000, opacity: 0.6, emissive: 0xffffff });
             
-            // max and min and adjust if needed
-            //let max    = this.findMax(pop);
-            //let min    = this.findMin(pop);
-            debugger;
             for (let i = 0; i < lat.length; i++) {
                 // calculate the position where we need to start the cube
-                //let position = this.latLongToVector3(((lat[i])-96*-1), (long[i]), 600, 2);
                 let position = this.latLongToVector3(((lat[i])), (long[i]), 600, 2);
                 let axis = new this.window.THREE.Vector3(-1, 0, 0);
                 let angle = Math.PI / 2;
                 position.applyAxisAngle(axis, angle);
                 // create the cube
-                //let cubeBody =  new this.window.THREE.Mesh(new this.window.THREE.CubeGeometry(5,5,pop[i]/median,1,1,1,cubeMat));
-                //let cubeBody =  new this.window.THREE.Mesh(new this.window.THREE.CubeGeometry(5,5,this.scaleBetween(pop[i],1,20,1,100),1,1,1,cubeMat));
                 let cubeBody =  new this.window.THREE.Mesh(new this.window.THREE.CubeGeometry(5,5,pop[i]/(this.getLength(pop[i])*2000),1,1,1,cubeMat));
                 // position the cube correctly
                 cubeBody.position.set(position.x, position.y, position.z);
