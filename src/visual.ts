@@ -120,6 +120,10 @@ module powerbi.extensibility.visual {
             return median;
         }
 
+        public getLength(number : any) {
+            return number.toString().length;
+        }
+
         public addDensity(options : VisualUpdateOptions) {
             let lat : any[] = options.dataViews[0].categorical.categories[0].values as any[]; // Latitude array
             let long : any[] = options.dataViews[0].categorical.categories[1].values as any[]; // Longitude array
@@ -130,8 +134,10 @@ module powerbi.extensibility.visual {
             // material to use for each of our elements
             let cubeMat = new this.window.THREE.MeshLambertMaterial( {color: 0x000000, opacity: 0.6, emissive: 0xffffff });
             
-            // find median
-            let median = this.findMedian(pop);
+            // max and min and adjust if needed
+            //let max    = this.findMax(pop);
+            //let min    = this.findMin(pop);
+            debugger;
             for (let i = 0; i < lat.length; i++) {
                 // calculate the position where we need to start the cube
                 //let position = this.latLongToVector3(((lat[i])-96*-1), (long[i]), 600, 2);
@@ -140,7 +146,9 @@ module powerbi.extensibility.visual {
                 let angle = Math.PI / 2;
                 position.applyAxisAngle(axis, angle);
                 // create the cube
-                let cubeBody =  new this.window.THREE.Mesh(new this.window.THREE.CubeGeometry(5,5,pop[i]/median,1,1,1,cubeMat));
+                //let cubeBody =  new this.window.THREE.Mesh(new this.window.THREE.CubeGeometry(5,5,pop[i]/median,1,1,1,cubeMat));
+                //let cubeBody =  new this.window.THREE.Mesh(new this.window.THREE.CubeGeometry(5,5,this.scaleBetween(pop[i],1,20,1,100),1,1,1,cubeMat));
+                let cubeBody =  new this.window.THREE.Mesh(new this.window.THREE.CubeGeometry(5,5,pop[i]/(this.getLength(pop[i])*2000),1,1,1,cubeMat));
                 // position the cube correctly
                 cubeBody.position.set(position.x, position.y, position.z);
                 cubeBody.lookAt( new this.window.THREE.Vector3(0,0,0));
