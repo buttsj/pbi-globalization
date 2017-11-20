@@ -11,15 +11,21 @@
             "kind": "Grouping"
         },
         {
-            "displayName": "Population",
-            "name": "population",
+            "displayName": "Value",
+            "name": "value",
             "kind": "Grouping"
         }
     ],
-    "dataViewMappings": [{   
-        "table": {
-                "rows": {
-                    "dataReductionAlgorithm": { "top": {"count": 20000 } }, "select": [{ "for": { "in": "latitude" }}, { "for": { "in": "longitude" }}, { "for": { "in": "population" }}]
+    "dataViewMappings": [
+        {   
+            "conditions":[
+                { "latitude": { "max": 1 }, "longitude": { "max": 1 }, "value": { "max": 1 } }
+            ],
+            "table": 
+            {
+                "rows": 
+                {
+                    "dataReductionAlgorithm": { "top": {"count": 20000 } }, "select": [{ "for": { "in": "latitude" }}, { "for": { "in": "longitude" }}, { "for": { "in": "value" }}]
                 }
             }
         }
