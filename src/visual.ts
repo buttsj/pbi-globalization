@@ -42,8 +42,6 @@ module powerbi.extensibility.visual {
         private mouseX          : any = 0;
         private mouseY          : any = 0;
 
-        private text            : HTMLDivElement;
-
         constructor(options: VisualConstructorOptions) {
             // store an instance of the window for unknown reasons (will error otherwise)
             this.window = window;
@@ -62,10 +60,6 @@ module powerbi.extensibility.visual {
             options.element.appendChild(this.renderer.domElement);
             document.addEventListener('mousedown', this.onDocumentMouseDown, false);
             document.addEventListener('mousemove', this.onDocumentMouseMove, false);
-            this.text = document.createElement('div');
-            this.text.setAttribute('style', 'font-family:Consolas;color:white;top:' + (this.window.innerHeight - 20) + 'px;left:' + ((this.window.innerWidth/2) - 40) + 'px;position:absolute;font-size:3vw;');
-            this.text.innerHTML = "";
-            options.element.appendChild(this.text);
         }
 
         onDocumentMouseDown = (event : any) => {
@@ -125,7 +119,20 @@ module powerbi.extensibility.visual {
             return number.toString().length;
         }
 
+        public findIndicesOfMax(inp : any[], count : any) {
+            let outp = [];
+            for (let i = 0; i < inp.length; i++) {
+                outp.push(i); // add index to output array
+                if (outp.length > count) {
+                    outp.sort(function(a, b) { return inp[b] - inp[a]; }); // descending sort the output array
+                    outp.pop(); // remove the last index (index of smallest element in output array)
+                }
+            }
+            return outp;
+        }
+
         public addDensity(options : VisualUpdateOptions) {
+            debugger;
             let lat : any[] = options.dataViews[0].categorical.categories[0].values as any[]; // Latitude array
             let long : any[] = options.dataViews[0].categorical.categories[1].values as any[]; // Longitude array
             let pop : any[] = options.dataViews[0].categorical.categories[2].values as any[]; // Population array
@@ -134,7 +141,9 @@ module powerbi.extensibility.visual {
             let mergedGeom = new this.window.THREE.Geometry();
             // material to use for each of our elements
             let cubeMat = new this.window.THREE.MeshLambertMaterial( {color: 0x000000, opacity: 0.6, emissive: 0xffffff });
-            
+            // find indices of top 5 numbers
+            let indices = this.findIndicesOfMax(pop, 5);
+
             for (let i = 0; i < lat.length; i++) {
                 // calculate the position where we need to start the cube
                 let position = this.latLongToVector3(((lat[i])), (long[i]), 600, 2);
@@ -146,15 +155,20 @@ module powerbi.extensibility.visual {
                 // position the cube correctly
                 cubeBody.position.set(position.x, position.y, position.z);
                 cubeBody.lookAt( new this.window.THREE.Vector3(0,0,0));
-                // set the cube's name as its value
-                cubeBody.name = pop[i].toString();
+                // if the pop[i] is in the list of top 5 pops, set the textbox
+                if (indices.indexOf(i) > -1) {
+                    // put pop[i] on a textbox and display it at the right location
+                    debugger;
+                    var sprite = this.makeTextSprite(" " + pop[i] + " ", { fontsize: 60, backgroundColor: {r:255, g:100, b:100, a:1} });
+                    sprite.position.set(position.x, position.y, position.z + 20);
+                    this.scene.add(sprite);
+                }
                 // merge with main model
                 cubeBody.updateMatrix();
                 mergedGeom.merge(cubeBody.geometry, cubeBody.matrix);
             }
             // create a new mesh, containing all the other meshes.
             this.total = new this.window.THREE.Mesh(mergedGeom, cubeMat);
-            this.total.name = "total";
             // and add the total mesh to the scene
             this.scene.add(this.total);
         }
@@ -177,7 +191,6 @@ module powerbi.extensibility.visual {
                 shininess: 0.2 
             });
             let earthMesh = new this.window.THREE.Mesh(geometry, material);
-            earthMesh.name = "Earth";
             this.scene.add(earthMesh);
         }
 
@@ -199,7 +212,6 @@ module powerbi.extensibility.visual {
             requestAnimationFrame(() => this.render());
             this.renderer.render(this.scene, this.camera);
             this.renderer.setSize(this.window.innerWidth, this.window.innerHeight);
-            this.text.setAttribute('style', 'font-family:Consolas;color:white;top:' + (this.window.innerHeight - 20) + 'px;left:' + ((this.window.innerWidth/2) - 35) + 'px;position:absolute;font-size:3vw;');
         }
 
         public update(options: VisualUpdateOptions) {
@@ -224,6 +236,76 @@ module powerbi.extensibility.visual {
                 }
             }
             this.render();
+        }
+
+        public makeTextSprite(message : any, parameters : any)
+        {
+            if ( parameters === undefined ) {
+                parameters = {};
+            }
+            var fontface = parameters.hasOwnProperty("fontface") ? 
+                parameters["fontface"] : "Arial";
+            
+            var fontsize = parameters.hasOwnProperty("fontsize") ? 
+                parameters["fontsize"] : 18;
+            
+            var borderThickness = parameters.hasOwnProperty("borderThickness") ? 
+                parameters["borderThickness"] : 4;
+            
+            var borderColor = parameters.hasOwnProperty("borderColor") ?
+                parameters["borderColor"] : { r:0, g:0, b:0, a:1.0 };
+            
+            var backgroundColor = parameters.hasOwnProperty("backgroundColor") ?
+                parameters["backgroundColor"] : { r:255, g:255, b:255, a:1.0 };
+        
+            var canvas = document.createElement('canvas');
+            var context = canvas.getContext('2d');
+            context.font = "Bold " + fontsize + "px " + fontface;
+            
+            // get size data (height depends only on font size)
+            var metrics = context.measureText(message);
+            var textWidth = metrics.width;
+            
+            // background color
+            context.fillStyle   = "rgba(" + backgroundColor.r + "," + backgroundColor.g + ","
+                                          + backgroundColor.b + "," + backgroundColor.a + ")";
+            // border color
+            context.strokeStyle = "rgba(" + borderColor.r + "," + borderColor.g + ","
+                                          + borderColor.b + "," + borderColor.a + ")";
+        
+            context.lineWidth = borderThickness;
+            this.roundRect(context, borderThickness/2, borderThickness/2, textWidth + borderThickness, fontsize * 1.4 + borderThickness, 6);
+            
+            // text color
+            context.fillStyle = "rgba(0, 0, 0, 1.0)";
+        
+            context.fillText( message, borderThickness, fontsize + borderThickness);
+            
+            // canvas contents will be used for a texture
+            var texture = new this.window.THREE.Texture(canvas) 
+            texture.needsUpdate = true;
+            var spriteMaterial = new this.window.THREE.SpriteMaterial({ map: texture, useScreenCoordinates: false });
+            var sprite = new this.window.THREE.Sprite(spriteMaterial);
+            sprite.scale.set(200,100,1.0);
+            return sprite;	
+        }
+
+        // function for drawing rounded rectangles
+        public roundRect(ctx : any, x : any, y : any, w : any, h : any, r : any) 
+        {
+            ctx.beginPath();
+            ctx.moveTo(x+r, y);
+            ctx.lineTo(x+w-r, y);
+            ctx.quadraticCurveTo(x+w, y, x+w, y+r);
+            ctx.lineTo(x+w, y+h-r);
+            ctx.quadraticCurveTo(x+w, y+h, x+w-r, y+h);
+            ctx.lineTo(x+r, y+h);
+            ctx.quadraticCurveTo(x, y+h, x, y+h-r);
+            ctx.lineTo(x, y+r);
+            ctx.quadraticCurveTo(x, y, x+r, y);
+            ctx.closePath();
+            ctx.fill();
+            ctx.stroke();   
         }
 
         public loadImage() {
