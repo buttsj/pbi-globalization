@@ -41,11 +41,6 @@ module powerbi.extensibility.visual {
         private mouseDown       : boolean = false;
         private mouseX          : any = 0;
         private mouseY          : any = 0;
-        
-        private hudScene        : THREE.Scene;
-        private hudCamera       : THREE.OrthographicCamera;
-        private hudBitmap       : any;
-        private hudTexture      : THREE.Texture;
 
         constructor(options: VisualConstructorOptions) {
             // store an instance of the window for unknown reasons (will error otherwise)
@@ -53,39 +48,18 @@ module powerbi.extensibility.visual {
             // create the scene
             this.scene = new this.window.THREE.Scene({ alpha: true });
             this.scene.background = new this.window.THREE.Color(0x111111);
-            // make the rotating camera
+            // make the camera & earth & lights
             this.createCamera();
-            // make the earth & lights
             this.createEarth();
             this.createLights();          
             // make the renderer and attach it
             this.renderer = new this.window.THREE.WebGLRenderer();
+            this.renderer.setPixelRatio(this.window.devicePixelRatio );
             this.renderer.setSize( this.window.innerWidth, this.window.innerHeight);
             this.renderer.autoClear = false;
             options.element.appendChild(this.renderer.domElement);
             document.addEventListener('mousedown', this.onDocumentMouseDown, false);
             document.addEventListener('mousemove', this.onDocumentMouseMove, false);
-            debugger;
-            // make HUD
-            let hudCanvas = document.createElement('canvas');
-            hudCanvas.width = this.window.innerWidth;
-            hudCanvas.height = this.window.innerHeight;
-            this.hudBitmap = hudCanvas.getContext('2d');
-            this.hudBitmap.font = "Normal 20px Consolas";
-            this.hudBitmap.textAlign = "center";
-            this.hudBitmap.fillStyle = "rgba(245,245,245,0.75)";
-            this.hudBitmap.fillText('', this.window.innerWidth/2, this.window.innerHeight/2);
-            this.hudCamera = new this.window.THREE.OrthographicCamera(-this.window.innerWidth/2, this.window.innerWidth/2, this.window.innerHeight/2, -this.window.innerHeight/2, 0, 4000);
-
-            this.hudScene = new this.window.THREE.Scene();
-            this.hudTexture = new this.window.THREE.Texture(hudCanvas);
-            this.hudTexture.needsUpdate = true;
-
-            let material = new this.window.THREE.MeshBasicMaterial( {map: this.hudTexture} );
-            material.transparent = true;
-            let planeGeometry = new this.window.THREE.PlaneGeometry(this.window.innerWidth, this.window.innerHeight);
-            let plane = new this.window.THREE.Mesh(planeGeometry, material);
-            this.hudScene.add(plane);
         }
 
         onDocumentMouseDown = (event : any) => {
@@ -99,10 +73,12 @@ module powerbi.extensibility.visual {
 
         onDocumentMouseMove = (event : any) => {
             event.preventDefault();
+            // rotation for globe
             let deltaX = event.clientX - this.mouseX;
             let deltaY = event.clientY - this.mouseY;
             this.mouseX = event.clientX;
             this.mouseY = event.clientY;
+            // prevent rotation if button is not down
             if (!this.mouseDown) {
                 return;
             }
@@ -172,6 +148,7 @@ module powerbi.extensibility.visual {
             }
             // create a new mesh, containing all the other meshes.
             this.total = new this.window.THREE.Mesh(mergedGeom, cubeMat);
+            this.total.name = "total";
             // and add the total mesh to the scene
             this.scene.add(this.total);
         }
@@ -188,7 +165,7 @@ module powerbi.extensibility.visual {
         public createEarth() {
             this.loadImage();
             let geometry = new this.window.THREE.SphereGeometry(600, 50, 50);
-            let earthTexture = this.window.THREE.ImageUtils.loadTexture(this.earthImg);
+            let earthTexture = new this.window.THREE.TextureLoader().load(this.earthImg);
             let material = new this.window.THREE.MeshPhongMaterial({
                 map: earthTexture,
                 shininess: 0.2 
@@ -206,13 +183,18 @@ module powerbi.extensibility.visual {
         }
 
         public render() {
+            // update main camera
             this.camera.lookAt(new this.window.THREE.Vector3(0, 0, 0));
+            this.camera.aspect = this.window.innerWidth / this.window.innerHeight;
+            this.camera.updateProjectionMatrix();
+            this.updateTooltip();
+            // update lighting
             this.light.lookAt(new this.window.THREE.Vector3(0, 0, 0));
+            // animate
             requestAnimationFrame(() => this.render());
+            this.renderer.clear();
             this.renderer.render(this.scene, this.camera);
-            this.renderer.render(this.hudScene, this.hudCamera);
             this.renderer.setSize(this.window.innerWidth, this.window.innerHeight);
-            this.updateHUDCamera();
         }
 
         public update(options: VisualUpdateOptions) {
@@ -239,10 +221,8 @@ module powerbi.extensibility.visual {
             this.render();
         }
 
-        public updateHUDCamera() {
-            this.hudBitmap.clearRect(0, 0, this.window.innerWidth, this.window.innerHeight);
-            this.hudBitmap.fillText("text here", this.window.innerWidth/2, this.window.innerHeight/2);
-            this.hudTexture.needsUpdate = true;
+        public updateTooltip() {
+
         }
 
         public loadImage() {
