@@ -26,21 +26,26 @@
 /// <amd-dependency path='three'>
 module powerbi.extensibility.visual {
     export class Visual implements IVisual {
-        private total       : THREE.Mesh;
-        private earthImg    : any;
-        private canvas      : HTMLElement;
-        private camera      : THREE.PerspectiveCamera;
-        private scene       : THREE.Scene;
-        private renderer    : THREE.WebGLRenderer;
-        private light       : THREE.DirectionalLight;
-        private window      : any;
-        private POS_X       : any = 1800;
-        private POS_Y       : any = 500;
-        private POS_Z       : any = 1800;
-        private pivot       : THREE.Object3D;
-        private mouseDown   : boolean = false;
-        private mouseX      : any = 0;
-        private mouseY      : any = 0;
+        private total           : THREE.Mesh;
+        private earthImg        : any;
+        private canvas          : HTMLElement;
+        private camera          : THREE.PerspectiveCamera;
+        private scene           : THREE.Scene;
+        private renderer        : THREE.WebGLRenderer;
+        private light           : THREE.DirectionalLight;
+        private window          : any;
+        private POS_X           : any = 1800;
+        private POS_Y           : any = 500;
+        private POS_Z           : any = 1800;
+        private pivot           : THREE.Object3D;
+        private mouseDown       : boolean = false;
+        private mouseX          : any = 0;
+        private mouseY          : any = 0;
+        
+        private hudScene        : THREE.Scene;
+        private hudCamera       : THREE.OrthographicCamera;
+        private hudBitmap       : any;
+        private hudTexture      : THREE.Texture;
 
         constructor(options: VisualConstructorOptions) {
             // store an instance of the window for unknown reasons (will error otherwise)
@@ -56,8 +61,31 @@ module powerbi.extensibility.visual {
             // make the renderer and attach it
             this.renderer = new this.window.THREE.WebGLRenderer();
             this.renderer.setSize( this.window.innerWidth, this.window.innerHeight);
+            this.renderer.autoClear = false;
             options.element.appendChild(this.renderer.domElement);
-            document.addEventListener('mousedown', this.onDocumentMouseDown, false );
+            document.addEventListener('mousedown', this.onDocumentMouseDown, false);
+            document.addEventListener('mousemove', this.onDocumentMouseMove, false);
+            debugger;
+            // make HUD
+            let hudCanvas = document.createElement('canvas');
+            hudCanvas.width = this.window.innerWidth;
+            hudCanvas.height = this.window.innerHeight;
+            this.hudBitmap = hudCanvas.getContext('2d');
+            this.hudBitmap.font = "Normal 20px Consolas";
+            this.hudBitmap.textAlign = "center";
+            this.hudBitmap.fillStyle = "rgba(245,245,245,0.75)";
+            this.hudBitmap.fillText('', this.window.innerWidth/2, this.window.innerHeight/2);
+            this.hudCamera = new this.window.THREE.OrthographicCamera(-this.window.innerWidth/2, this.window.innerWidth/2, this.window.innerHeight/2, -this.window.innerHeight/2, 0, 4000);
+
+            this.hudScene = new this.window.THREE.Scene();
+            this.hudTexture = new this.window.THREE.Texture(hudCanvas);
+            this.hudTexture.needsUpdate = true;
+
+            let material = new this.window.THREE.MeshBasicMaterial( {map: this.hudTexture} );
+            material.transparent = true;
+            let planeGeometry = new this.window.THREE.PlaneGeometry(this.window.innerWidth, this.window.innerHeight);
+            let plane = new this.window.THREE.Mesh(planeGeometry, material);
+            this.hudScene.add(plane);
         }
 
         onDocumentMouseDown = (event : any) => {
@@ -65,37 +93,34 @@ module powerbi.extensibility.visual {
             this.mouseDown = true;
             this.mouseX = event.clientX;
             this.mouseY = event.clientY;
-            document.addEventListener( 'mousemove', this.onDocumentMouseMove, false);
-            document.addEventListener( 'mouseup', this.onDocumentMouseUp, false);
-            document.addEventListener( 'mouseout', this.onDocumentMouseOut, false);
+            document.addEventListener('mouseup', this.onDocumentMouseUp, false);
+            document.addEventListener('mouseout', this.onDocumentMouseOut, false);
         }
 
         onDocumentMouseMove = (event : any) => {
-            if (!this.mouseDown) {
-                return;
-            }
             event.preventDefault();
             let deltaX = event.clientX - this.mouseX;
             let deltaY = event.clientY - this.mouseY;
             this.mouseX = event.clientX;
             this.mouseY = event.clientY;
+            if (!this.mouseDown) {
+                return;
+            }
             this.rotateCamera(deltaX, deltaY);
         }
 
         onDocumentMouseUp = (event : any) => {
             event.preventDefault();
             this.mouseDown = false;
-            document.removeEventListener('mousemove', this.onDocumentMouseMove, false );
-            document.removeEventListener( 'mouseup', this.onDocumentMouseUp, false );
-            document.removeEventListener( 'mouseout', this.onDocumentMouseOut, false );
+            document.removeEventListener('mouseup', this.onDocumentMouseUp, false );
+            document.removeEventListener('mouseout', this.onDocumentMouseOut, false);
         }
 
         onDocumentMouseOut = (event : any) => {
             event.preventDefault();
             this.mouseDown = false;
-            document.removeEventListener('mousemove', this.onDocumentMouseMove, false );
-            document.removeEventListener( 'mouseup', this.onDocumentMouseUp, false );
-            document.removeEventListener( 'mouseout', this.onDocumentMouseOut, false );
+            document.removeEventListener('mouseup', this.onDocumentMouseUp, false);
+            document.removeEventListener('mouseout', this.onDocumentMouseOut, false);
         }
 
         public rotateCamera(deltaX : any, deltaY : any) {
@@ -139,6 +164,8 @@ module powerbi.extensibility.visual {
                 // position the cube correctly
                 cubeBody.position.set(position.x, position.y, position.z);
                 cubeBody.lookAt( new this.window.THREE.Vector3(0,0,0));
+                // set the cube's name as its value
+                cubeBody.name = pop[i].toString();
                 // merge with main model
                 cubeBody.updateMatrix();
                 mergedGeom.merge(cubeBody.geometry, cubeBody.matrix);
@@ -167,6 +194,7 @@ module powerbi.extensibility.visual {
                 shininess: 0.2 
             });
             let earthMesh = new this.window.THREE.Mesh(geometry, material);
+            earthMesh.name = "Earth";
             this.scene.add(earthMesh);
         }
 
@@ -182,7 +210,9 @@ module powerbi.extensibility.visual {
             this.light.lookAt(new this.window.THREE.Vector3(0, 0, 0));
             requestAnimationFrame(() => this.render());
             this.renderer.render(this.scene, this.camera);
-            this.renderer.setSize(this.window.innerWidth, this.window.innerHeight);      
+            this.renderer.render(this.hudScene, this.hudCamera);
+            this.renderer.setSize(this.window.innerWidth, this.window.innerHeight);
+            this.updateHUDCamera();
         }
 
         public update(options: VisualUpdateOptions) {
@@ -207,6 +237,12 @@ module powerbi.extensibility.visual {
                 }
             }
             this.render();
+        }
+
+        public updateHUDCamera() {
+            this.hudBitmap.clearRect(0, 0, this.window.innerWidth, this.window.innerHeight);
+            this.hudBitmap.fillText("text here", this.window.innerWidth/2, this.window.innerHeight/2);
+            this.hudTexture.needsUpdate = true;
         }
 
         public loadImage() {
