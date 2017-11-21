@@ -42,6 +42,8 @@ module powerbi.extensibility.visual {
         private mouseX          : any = 0;
         private mouseY          : any = 0;
 
+        private text            : HTMLDivElement;
+
         constructor(options: VisualConstructorOptions) {
             // store an instance of the window for unknown reasons (will error otherwise)
             this.window = window;
@@ -60,6 +62,10 @@ module powerbi.extensibility.visual {
             options.element.appendChild(this.renderer.domElement);
             document.addEventListener('mousedown', this.onDocumentMouseDown, false);
             document.addEventListener('mousemove', this.onDocumentMouseMove, false);
+            this.text = document.createElement('div');
+            this.text.setAttribute('style', 'font-family:Consolas;color:white;top:' + (this.window.innerHeight - 20) + 'px;left:' + ((this.window.innerWidth/2) - 40) + 'px;position:absolute;font-size:3vw;');
+            this.text.innerHTML = "";
+            options.element.appendChild(this.text);
         }
 
         onDocumentMouseDown = (event : any) => {
@@ -187,14 +193,13 @@ module powerbi.extensibility.visual {
             this.camera.lookAt(new this.window.THREE.Vector3(0, 0, 0));
             this.camera.aspect = this.window.innerWidth / this.window.innerHeight;
             this.camera.updateProjectionMatrix();
-            this.updateTooltip();
             // update lighting
             this.light.lookAt(new this.window.THREE.Vector3(0, 0, 0));
             // animate
             requestAnimationFrame(() => this.render());
-            this.renderer.clear();
             this.renderer.render(this.scene, this.camera);
             this.renderer.setSize(this.window.innerWidth, this.window.innerHeight);
+            this.text.setAttribute('style', 'font-family:Consolas;color:white;top:' + (this.window.innerHeight - 20) + 'px;left:' + ((this.window.innerWidth/2) - 35) + 'px;position:absolute;font-size:3vw;');
         }
 
         public update(options: VisualUpdateOptions) {
@@ -219,10 +224,6 @@ module powerbi.extensibility.visual {
                 }
             }
             this.render();
-        }
-
-        public updateTooltip() {
-
         }
 
         public loadImage() {
