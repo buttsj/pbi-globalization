@@ -15,7 +15,7 @@ Navigate to the /dist/ folder and import the .pbiviz file into your PBI Desktop/
 
 ## Contributors
 
-Jack Butts [Portfolio](https://www.dreameater.net)
+Jack Butts [[Github]](https://github.com/buttsj)
 
 ## Release History
 
