@@ -34,3 +34,8 @@ Jack Butts [[Github]](https://github.com/buttsj)
 * Possible future features:
     * Allow click filtering on data bars
     * Let user choose how many tooltips to show on screen
+
+***
+###### Thanks
+    * Code examples & inspiration by http://www.smartjava.org/content/render-open-data-3d-world-globe-threejs
+    * Code examples & inspiration by http://stemkoski.github.io/Three.js/Labeled-Geometry.html
