@@ -34,19 +34,17 @@ module powerbi.extensibility.visual {
         private renderer        : THREE.WebGLRenderer;
         private light           : THREE.DirectionalLight;
         private window          : any;
-        private POS_X           : any = 1800;
-        private POS_Y           : any = 500;
-        private POS_Z           : any = 1800;
         private pivot           : THREE.Object3D;
         private mouseDown       : boolean = false;
         private mouseX          : any = 0;
         private mouseY          : any = 0;
         private textboxes       : THREE.Sprite[];
+        private prevCanvasX     : any;
+        private prevCanvasY     : any;
 
         constructor(options: VisualConstructorOptions) {
             // instantiate array of textboxes
             this.textboxes = [];
-            // store an instance of the window for unknown reasons (will error otherwise)
             this.window = window;
             // create the scene
             this.scene = new this.window.THREE.Scene({ alpha: true });
@@ -61,8 +59,15 @@ module powerbi.extensibility.visual {
             this.renderer.setSize( this.window.innerWidth, this.window.innerHeight);
             this.renderer.autoClear = false;
             options.element.appendChild(this.renderer.domElement);
-            document.addEventListener('mousedown', this.onDocumentMouseDown, false);
-            document.addEventListener('mousemove', this.onDocumentMouseMove, false);
+            document.addEventListener(MOUSEDOWN, this.onDocumentMouseDown, false);
+            document.addEventListener(MOUSEMOVE, this.onDocumentMouseMove, false);
+            this.window.addEventListener(RESIZE, this.onWindowResize, false);
+        }
+
+        onWindowResize = (event : any) => {
+            this.camera.aspect = this.window.innerWidth / this.window.innerHeight;
+            this.camera.updateProjectionMatrix();
+            this.renderer.setSize(this.window.innerWidth, this.window.innerHeight);
         }
 
         onDocumentMouseDown = (event : any) => {
@@ -70,18 +75,16 @@ module powerbi.extensibility.visual {
             this.mouseDown = true;
             this.mouseX = event.clientX;
             this.mouseY = event.clientY;
-            document.addEventListener('mouseup', this.onDocumentMouseUp, false);
-            document.addEventListener('mouseout', this.onDocumentMouseOut, false);
+            document.addEventListener(MOUSEUP, this.onDocumentMouseUp, false);
+            document.addEventListener(MOUSEOUT, this.onDocumentMouseOut, false);
         }
 
         onDocumentMouseMove = (event : any) => {
             event.preventDefault();
-            // rotation for globe
             let deltaX = event.clientX - this.mouseX;
             let deltaY = event.clientY - this.mouseY;
             this.mouseX = event.clientX;
             this.mouseY = event.clientY;
-            // prevent rotation if button is not down
             if (!this.mouseDown) {
                 return;
             }
@@ -91,27 +94,27 @@ module powerbi.extensibility.visual {
         onDocumentMouseUp = (event : any) => {
             event.preventDefault();
             this.mouseDown = false;
-            document.removeEventListener('mouseup', this.onDocumentMouseUp, false );
-            document.removeEventListener('mouseout', this.onDocumentMouseOut, false);
+            document.removeEventListener(MOUSEUP, this.onDocumentMouseUp, false );
+            document.removeEventListener(MOUSEOUT, this.onDocumentMouseOut, false);
         }
 
         onDocumentMouseOut = (event : any) => {
             event.preventDefault();
             this.mouseDown = false;
-            document.removeEventListener('mouseup', this.onDocumentMouseUp, false);
-            document.removeEventListener('mouseout', this.onDocumentMouseOut, false);
+            document.removeEventListener(MOUSEUP, this.onDocumentMouseUp, false);
+            document.removeEventListener(MOUSEOUT, this.onDocumentMouseOut, false);
         }
 
         public rotateCamera(deltaX : any, deltaY : any) {
-            this.pivot.rotation.y -= deltaX / 100;
-            this.pivot.rotation.x -= deltaY / 100;
+            this.pivot.rotation.y -= deltaX / CAMROT;
+            this.pivot.rotation.x -= deltaY / CAMROT;
         }
 
         public latLongToVector3(lat : any, lon : any, radius : any) {
-            var cosLat = Math.cos(lat * Math.PI / 180.0);
-            var sinLat = Math.sin(lat * Math.PI / 180.0);
-            var cosLon = Math.cos(lon * Math.PI / 180.0);
-            var sinLon = Math.sin(lon * Math.PI / 180.0);
+            var cosLat = Math.cos(lat * Math.PI / PIDIVISOR);
+            var sinLat = Math.sin(lat * Math.PI / PIDIVISOR);
+            var cosLon = Math.cos(lon * Math.PI / PIDIVISOR);
+            var sinLon = Math.sin(lon * Math.PI / PIDIVISOR);
             var x = radius * cosLat * cosLon;
             var y = radius * cosLat * sinLon;
             var z = radius * sinLat;
@@ -125,10 +128,10 @@ module powerbi.extensibility.visual {
         public findIndicesOfMax(inp : any[], count : any) {
             let outp = [];
             for (let i = 0; i < inp.length; i++) {
-                outp.push(i); // add index to output array
+                outp.push(i);
                 if (outp.length > count) {
-                    outp.sort(function(a, b) { return inp[b] - inp[a]; }); // descending sort the output array
-                    outp.pop(); // remove the last index (index of smallest element in output array)
+                    outp.sort(function(a, b) { return inp[b] - inp[a]; });
+                    outp.pop();
                 }
             }
             return outp;
@@ -138,7 +141,7 @@ module powerbi.extensibility.visual {
             let lat : any[] = options.dataViews[0].categorical.categories[0].values as any[]; // Latitude array
             let long : any[] = options.dataViews[0].categorical.categories[1].values as any[]; // Longitude array
             let pop : any[] = options.dataViews[0].categorical.categories[2].values as any[]; // Population array
-            let name : any[] = options.dataViews[0].categorical.categories[3].values as any[];
+            let name : any[] = options.dataViews[0].categorical.categories[3].values as any[]; // Name array
             
             // the geometry that will contain all of our cubes
             let mergedGeom = new this.window.THREE.Geometry();
@@ -149,12 +152,12 @@ module powerbi.extensibility.visual {
 
             for (let i = 0; i < lat.length; i++) {
                 // calculate the position where we need to start the cube
-                let position = this.latLongToVector3(((lat[i])), (long[i]), 600);
+                let position = this.latLongToVector3(((lat[i])), (long[i]), GLOBERADIUS);
                 let axis = new this.window.THREE.Vector3(-1, 0, 0);
                 let angle = Math.PI / 2;
                 position.applyAxisAngle(axis, angle);
                 // create the cube
-                let cubeGeo = new this.window.THREE.BoxGeometry(5,5,pop[i]/(this.getLength(pop[i])*2000),1,1,1,cubeMat);
+                let cubeGeo = new this.window.THREE.BoxGeometry(5,5,pop[i]/(this.getLength(pop[i])*CUBESCALER),1,1,1,cubeMat);
                 let cubeBody =  new this.window.THREE.Mesh(cubeGeo);
                 // position the cube correctly
                 cubeBody.position.set(position.x, position.y, position.z);
@@ -162,8 +165,8 @@ module powerbi.extensibility.visual {
                 cubeBody.updateMatrix();
                 // if the pop[i] is in the list of top 5 pops, set the textbox
                 if (indices.indexOf(i) > -1) {
-                    var sprite = this.makeTextSprite(" " + name[i] + " " + pop[i] + " ", { fontsize: 60, backgroundColor: {r:255, g:100, b:100, a:1} });
-                    let sPos = this.latLongToVector3(((lat[i])), (long[i]), 1000);
+                    var sprite = this.makeTextSprite(" " + name[i] + " " + pop[i] + " ", { fontsize: FONTSIZE, backgroundColor: {r:255, g:100, b:100, a:1} });
+                    let sPos = this.latLongToVector3(((lat[i])), (long[i]), TOOLTIPRADIUS);
                     sPos.applyAxisAngle(axis, angle);
                     sprite.position.set(sPos.x, sPos.y, sPos.z);
                     this.scene.add(sprite);
@@ -178,8 +181,8 @@ module powerbi.extensibility.visual {
         }
 
         public createCamera() {
-            this.camera = new this.window.THREE.PerspectiveCamera( 45, this.window.innerWidth / this.window.innerHeight, 1, 4000);
-            this.camera.position.set(this.POS_X, this.POS_Y, this.POS_Z);
+            this.camera = new this.window.THREE.PerspectiveCamera(FOV, this.window.innerWidth/this.window.innerHeight, NEAR, FAR);
+            this.camera.position.set(POS_X, POS_Y, POS_Z);
             this.camera.lookAt(new this.window.THREE.Vector3(0, 0, 0));
             this.pivot = new this.window.THREE.Object3D();
             this.pivot.add(this.camera);
@@ -188,40 +191,35 @@ module powerbi.extensibility.visual {
 
         public createEarth() {
             this.loadImage();
-            let geometry = new this.window.THREE.SphereGeometry(600, 50, 50);
+            let geometry = new this.window.THREE.SphereGeometry(GLOBERADIUS, WIDTHSEGMENT, HEIGHTSEGMENT);
             let earthTexture = new this.window.THREE.TextureLoader().load(this.earthImg);
             let material = new this.window.THREE.MeshPhongMaterial({
                 map: earthTexture,
-                shininess: 0.2 
+                shininess: SHINE 
             });
             let earthMesh = new this.window.THREE.Mesh(geometry, material);
             this.scene.add(earthMesh);
         }
 
         public createLights() {
-            this.light = new this.window.THREE.DirectionalLight(0x3333ee, 3.5, 500);
+            this.light = new this.window.THREE.DirectionalLight(0x3333ee, 3.5);
             this.scene.add(this.light);
-            this.light.position.set(this.POS_X, this.POS_Y, this.POS_Z);
+            this.light.position.set(POS_X, POS_Y, POS_Z);
             this.pivot.add(this.light);
         }
 
         public render() {
-            // update main camera
             this.camera.lookAt(new this.window.THREE.Vector3(0, 0, 0));
-            this.camera.aspect = this.window.innerWidth / this.window.innerHeight;
-            this.camera.updateProjectionMatrix();
-            // update lighting
             this.light.lookAt(new this.window.THREE.Vector3(0, 0, 0));
-            // animate
             requestAnimationFrame(() => this.render());
             this.renderer.render(this.scene, this.camera);
-            this.renderer.setSize(this.window.innerWidth, this.window.innerHeight);
         }
 
         public update(options: VisualUpdateOptions) {
-            if (options.dataViews[0].categorical.categories.length > 3) {
-                if (this.total != null)
-                {
+            // Don't display anything but globe until data buckets are filled
+            // Cleanup the screen if data buckets are deleted
+            if (options.dataViews[0].categorical.categories.length === DATABUCKETS) {
+                if (this.total != undefined) {
                     this.total.geometry.dispose();
                     this.total.material.dispose();
                     this.scene.remove(this.total);
@@ -230,13 +228,12 @@ module powerbi.extensibility.visual {
                 while (this.textboxes.length > 0) {
                     let tmp = this.textboxes.pop();
                     this.scene.remove(tmp);
-                    tmp = null;
+                    tmp = undefined;
                 }
                 this.addDensity(options);
             }
-            else
-            {
-                if (this.total != null)
+            else {
+                if (this.total != undefined)
                 {
                     this.total.geometry.dispose();
                     this.total.material.dispose();
@@ -246,7 +243,7 @@ module powerbi.extensibility.visual {
                 while (this.textboxes.length > 0) {
                     let tmp = this.textboxes.pop();
                     this.scene.remove(tmp);
-                    tmp = null;
+                    tmp = undefined;
                 }
             }
             this.render();
@@ -256,25 +253,26 @@ module powerbi.extensibility.visual {
             if ( parameters === undefined ) {
                 parameters = {};
             }
-            var fontface = parameters.hasOwnProperty("fontface") ? 
-                parameters["fontface"] : "Arial";
+            var fontface = parameters.hasOwnProperty(FONTFACE) ? 
+                parameters[FONTFACE] : FONTARIAL;
             
-            var fontsize = parameters.hasOwnProperty("fontsize") ? 
-                parameters["fontsize"] : 18;
+            var fontsize = parameters.hasOwnProperty(FONTSIZETXT) ? 
+                parameters[FONTSIZETXT] : FONTDEFAULT;
             
-            var borderThickness = parameters.hasOwnProperty("borderThickness") ? 
-                parameters["borderThickness"] : 4;
+            var borderThickness = parameters.hasOwnProperty(BORDTHICK) ? 
+                parameters[BORDTHICK] : BORDDEFAULT;
             
-            var borderColor = parameters.hasOwnProperty("borderColor") ?
-                parameters["borderColor"] : { r:0, g:0, b:0, a:1.0 };
+            var borderColor = parameters.hasOwnProperty(BORDCOLOR) ?
+                parameters[BORDCOLOR] : { r:0, g:0, b:0, a:1.0 };
             
-            var backgroundColor = parameters.hasOwnProperty("backgroundColor") ?
-                parameters["backgroundColor"] : { r:255, g:255, b:255, a:1.0 };
+            var backgroundColor = parameters.hasOwnProperty(BACKCOLOR) ?
+                parameters[BACKCOLOR] : { r:255, g:255, b:255, a:1.0 };
         
-            var canvas = document.createElement('canvas');
-            canvas.setAttribute('width', '800');
-            var context = canvas.getContext('2d');
-            context.font = "Bold " + fontsize + "px " + fontface;
+            var canvas = document.createElement(CANVASTAG);
+            canvas.setAttribute(WIDTHTAG, WIDTHVAL);
+            canvas.setAttribute(HEIGHTTAG, HEIGHTVAL);
+            var context = canvas.getContext(TWODIMTAG);
+            context.font = BOLD + fontsize + PIXELS + fontface;
             
             // get size data (height depends only on font size)
             var metrics = context.measureText(message);
@@ -291,7 +289,7 @@ module powerbi.extensibility.visual {
             this.roundRect(context, borderThickness/2, borderThickness/2, textWidth + borderThickness, fontsize * 1.4 + borderThickness, 6);
             
             // text color
-            context.fillStyle = "rgba(0, 0, 0, 1.0)";
+            context.fillStyle = TXTCOLOR;
         
             context.fillText( message, 0, fontsize + borderThickness);
             
@@ -300,11 +298,10 @@ module powerbi.extensibility.visual {
             texture.needsUpdate = true;
             var spriteMaterial = new this.window.THREE.SpriteMaterial({ map: texture });
             var sprite = new this.window.THREE.Sprite(spriteMaterial);
-            sprite.scale.set(250,100,1.0);
+            sprite.scale.set(350,100,1.0);
             return sprite;	
         }
 
-        // function for drawing rounded rectangles
         public roundRect(ctx : any, x : any, y : any, w : any, h : any, r : any) {
             ctx.beginPath();
             ctx.moveTo(x+r, y);
