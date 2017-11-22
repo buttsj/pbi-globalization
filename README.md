@@ -5,13 +5,13 @@
 
 Give the visualization a latitude + longitude coordinate, as well as a data value to build at that location.
 
-![Image of Visualization](https://github.com/buttsj/pbi-globalization/assets/globe_img1.PNG)
+![Image of Visualization](https://github.com/buttsj/pbi-globalization/blob/master/assets/globe_img1.PNG)
 
 ## Installing this Visualization
 
 Navigate to the /dist/ folder and import the .pbiviz file into your PBI Desktop/Web App report.
 
-![Image of Icon](https://github.com/buttsj/pbi-globalization/assets/globe_icon.PNG)
+![Image of Icon](https://github.com/buttsj/pbi-globalization/blob/master/assets/globe_icon.PNG)
 
 ## Contributors
 
