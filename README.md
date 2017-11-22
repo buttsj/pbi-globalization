@@ -1,5 +1,5 @@
 # pbi-globalization
-> A PowerBI visualization to show data through Latitudes and Longitudes :earth_americas:
+> A Power BI visualization to show data through Latitudes and Longitudes :earth_americas:  :bar_chart:
 
 ## How it works
 
