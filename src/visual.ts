@@ -41,8 +41,11 @@ module powerbi.extensibility.visual {
         private mouseDown       : boolean = false;
         private mouseX          : any = 0;
         private mouseY          : any = 0;
+        private textboxes       : THREE.Sprite[];
 
         constructor(options: VisualConstructorOptions) {
+            // instantiate array of textboxes
+            this.textboxes = [];
             // store an instance of the window for unknown reasons (will error otherwise)
             this.window = window;
             // create the scene
@@ -104,7 +107,7 @@ module powerbi.extensibility.visual {
             this.pivot.rotation.x -= deltaY / 100;
         }
 
-        public latLongToVector3(lat : any, lon : any, radius : any, heigth : any) {
+        public latLongToVector3(lat : any, lon : any, radius : any) {
             var cosLat = Math.cos(lat * Math.PI / 180.0);
             var sinLat = Math.sin(lat * Math.PI / 180.0);
             var cosLon = Math.cos(lon * Math.PI / 180.0);
@@ -132,39 +135,40 @@ module powerbi.extensibility.visual {
         }
 
         public addDensity(options : VisualUpdateOptions) {
-            debugger;
             let lat : any[] = options.dataViews[0].categorical.categories[0].values as any[]; // Latitude array
             let long : any[] = options.dataViews[0].categorical.categories[1].values as any[]; // Longitude array
             let pop : any[] = options.dataViews[0].categorical.categories[2].values as any[]; // Population array
+            let name : any[] = options.dataViews[0].categorical.categories[3].values as any[];
             
             // the geometry that will contain all of our cubes
             let mergedGeom = new this.window.THREE.Geometry();
             // material to use for each of our elements
             let cubeMat = new this.window.THREE.MeshLambertMaterial( {color: 0x000000, opacity: 0.6, emissive: 0xffffff });
             // find indices of top 5 numbers
-            let indices = this.findIndicesOfMax(pop, 5);
+            let indices = this.findIndicesOfMax(pop, 10);
 
             for (let i = 0; i < lat.length; i++) {
                 // calculate the position where we need to start the cube
-                let position = this.latLongToVector3(((lat[i])), (long[i]), 600, 2);
+                let position = this.latLongToVector3(((lat[i])), (long[i]), 600);
                 let axis = new this.window.THREE.Vector3(-1, 0, 0);
                 let angle = Math.PI / 2;
                 position.applyAxisAngle(axis, angle);
                 // create the cube
-                let cubeBody =  new this.window.THREE.Mesh(new this.window.THREE.CubeGeometry(5,5,pop[i]/(this.getLength(pop[i])*2000),1,1,1,cubeMat));
+                let cubeGeo = new this.window.THREE.BoxGeometry(5,5,pop[i]/(this.getLength(pop[i])*2000),1,1,1,cubeMat);
+                let cubeBody =  new this.window.THREE.Mesh(cubeGeo);
                 // position the cube correctly
                 cubeBody.position.set(position.x, position.y, position.z);
                 cubeBody.lookAt( new this.window.THREE.Vector3(0,0,0));
+                cubeBody.updateMatrix();
                 // if the pop[i] is in the list of top 5 pops, set the textbox
                 if (indices.indexOf(i) > -1) {
-                    // put pop[i] on a textbox and display it at the right location
-                    debugger;
-                    var sprite = this.makeTextSprite(" " + pop[i] + " ", { fontsize: 60, backgroundColor: {r:255, g:100, b:100, a:1} });
-                    sprite.position.set(position.x, position.y, position.z + 20);
+                    var sprite = this.makeTextSprite(" " + name[i] + " " + pop[i] + " ", { fontsize: 60, backgroundColor: {r:255, g:100, b:100, a:1} });
+                    let sPos = this.latLongToVector3(((lat[i])), (long[i]), 1000);
+                    sPos.applyAxisAngle(axis, angle);
+                    sprite.position.set(sPos.x, sPos.y, sPos.z);
                     this.scene.add(sprite);
+                    this.textboxes.push(sprite);
                 }
-                // merge with main model
-                cubeBody.updateMatrix();
                 mergedGeom.merge(cubeBody.geometry, cubeBody.matrix);
             }
             // create a new mesh, containing all the other meshes.
@@ -215,13 +219,18 @@ module powerbi.extensibility.visual {
         }
 
         public update(options: VisualUpdateOptions) {
-            if (options.dataViews[0].categorical.categories.length > 2) {
+            if (options.dataViews[0].categorical.categories.length > 3) {
                 if (this.total != null)
                 {
                     this.total.geometry.dispose();
                     this.total.material.dispose();
                     this.scene.remove(this.total);
                     delete(this.total);
+                }
+                while (this.textboxes.length > 0) {
+                    let tmp = this.textboxes.pop();
+                    this.scene.remove(tmp);
+                    tmp = null;
                 }
                 this.addDensity(options);
             }
@@ -234,12 +243,16 @@ module powerbi.extensibility.visual {
                     this.scene.remove(this.total);
                     delete(this.total);
                 }
+                while (this.textboxes.length > 0) {
+                    let tmp = this.textboxes.pop();
+                    this.scene.remove(tmp);
+                    tmp = null;
+                }
             }
             this.render();
         }
 
-        public makeTextSprite(message : any, parameters : any)
-        {
+        public makeTextSprite(message : any, parameters : any){
             if ( parameters === undefined ) {
                 parameters = {};
             }
@@ -259,6 +272,7 @@ module powerbi.extensibility.visual {
                 parameters["backgroundColor"] : { r:255, g:255, b:255, a:1.0 };
         
             var canvas = document.createElement('canvas');
+            canvas.setAttribute('width', '800');
             var context = canvas.getContext('2d');
             context.font = "Bold " + fontsize + "px " + fontface;
             
@@ -279,20 +293,19 @@ module powerbi.extensibility.visual {
             // text color
             context.fillStyle = "rgba(0, 0, 0, 1.0)";
         
-            context.fillText( message, borderThickness, fontsize + borderThickness);
+            context.fillText( message, 0, fontsize + borderThickness);
             
             // canvas contents will be used for a texture
             var texture = new this.window.THREE.Texture(canvas) 
             texture.needsUpdate = true;
-            var spriteMaterial = new this.window.THREE.SpriteMaterial({ map: texture, useScreenCoordinates: false });
+            var spriteMaterial = new this.window.THREE.SpriteMaterial({ map: texture });
             var sprite = new this.window.THREE.Sprite(spriteMaterial);
-            sprite.scale.set(200,100,1.0);
+            sprite.scale.set(250,100,1.0);
             return sprite;	
         }
 
         // function for drawing rounded rectangles
-        public roundRect(ctx : any, x : any, y : any, w : any, h : any, r : any) 
-        {
+        public roundRect(ctx : any, x : any, y : any, w : any, h : any, r : any) {
             ctx.beginPath();
             ctx.moveTo(x+r, y);
             ctx.lineTo(x+w-r, y);
