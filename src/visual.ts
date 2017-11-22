@@ -298,7 +298,7 @@ module powerbi.extensibility.visual {
             texture.needsUpdate = true;
             var spriteMaterial = new this.window.THREE.SpriteMaterial({ map: texture });
             var sprite = new this.window.THREE.Sprite(spriteMaterial);
-            sprite.scale.set(350,100,1.0);
+            sprite.scale.set(350,80,1.0);
             return sprite;	
         }
 

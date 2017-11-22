@@ -5,7 +5,7 @@
 
 Give the visualization a latitude + longitude coordinate, data value, and location name. The globe will display a databar at each Lat/Long location with the length determined by the value. Tooltips will hover over the **top 10** values (or top x if there is less than 10 rows).
 
-![Image of Visualization](https://github.com/buttsj/pbi-globalization/blob/master/assets/globe_img1.PNG)
+![Image of Visualization](https://github.com/buttsj/pbi-globalization/blob/master/assets/newglobe_img.png)
 
 ## Installing this Visualization
 
