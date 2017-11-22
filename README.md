@@ -1,13 +1,17 @@
 # pbi-globalization
-> A PowerBI visualization to show data through Latitudes and Longitudes
+> A PowerBI visualization to show data through Latitudes and Longitudes :earth_americas:
 
 ## How it works
 
 Give the visualization a latitude + longitude coordinate, as well as a data value to build at that location.
 
+![Image of Visualization](https://github.com/buttsj/pbi-globalization/assets/globe_img1.PNG)
+
 ## Installing this Visualization
 
 Navigate to the /dist/ folder and import the .pbiviz file into your PBI Desktop/Web App report.
+
+![Image of Icon](https://github.com/buttsj/pbi-globalization/assets/globe_icon.PNG)
 
 ## Contributors
 
@@ -23,7 +27,9 @@ Jack Butts [Portfolio](https://www.dreameater.net)
     * Globe no longer auto-rotates
     * Globe can be rotated with mouse click and drag
     * Data is now scaled down by the median of the data set (easier to see all data bars on globe) 
-
-* Future features:
+* v1.2
+    * New required data bucket for a name of the Lat/Long location
+    * Tooltips now appear on the Top 10 values (displaying Name + Value)
+* Possible future features:
     * Allow click filtering on data bars
-    * Show tooltips on data bars
+    * Let user choose how many tooltips to show on screen
