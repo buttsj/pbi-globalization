@@ -1,10 +1,10 @@
 {
   "visual": {
-    "name": "pbi-globalization-v1_2",
+    "name": "pbi-globalization-v1_3",
     "displayName": "Globe Data Bars",
     "guid": "threejsE0E480FFE18F46FE90AD2FA3A0D80C5F",
     "visualClassName": "Visual",
-    "version": "1.2.0",
+    "version": "1.3.0",
     "description": "A PowerBI visualization to show data through Latitudes and Longitudes",
     "supportUrl": "https://www.dreameater.net",
     "gitHubUrl": "https://github.com/buttsj/pbi-globalization"

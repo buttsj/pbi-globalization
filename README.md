@@ -31,6 +31,9 @@ Jack Butts [[Github]](https://github.com/buttsj)
     * Data is now scaled down by the amount of the value, for better visibility
     * New required data bucket for a name of the Lat/Long location
     * Tooltips now appear on the Top 10 values (displaying Name + Value)
+* v1.3
+    * Background is available to be set in the properties now
+    * Can toggle off Title of visual now
 * Possible future features:
     * Allow click filtering on data bars
     * Let user choose how many tooltips to show on screen
