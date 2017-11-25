@@ -48,13 +48,14 @@ module powerbi.extensibility.visual {
             this.window = window;
             // create the scene
             this.scene = new this.window.THREE.Scene({ alpha: true });
-            this.scene.background = new this.window.THREE.Color(0x111111);
+            //this.scene.background = new this.window.THREE.Color(0x000000);
             // make the camera & earth & lights
             this.createCamera();
             this.createEarth();
             this.createLights();          
             // make the renderer and attach it
-            this.renderer = new this.window.THREE.WebGLRenderer();
+            this.renderer = new this.window.THREE.WebGLRenderer( { alpha: true });
+            this.renderer.setClearColor(0x000000, 0);
             this.renderer.setPixelRatio(this.window.devicePixelRatio );
             this.renderer.setSize( this.window.innerWidth, this.window.innerHeight);
             this.renderer.autoClear = false;
