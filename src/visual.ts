@@ -25,22 +25,24 @@
  */
 /// <amd-dependency path='three'>
 module powerbi.extensibility.visual {
+    import DataViewObjects = powerbi.extensibility.utils.dataview.DataViewObject;
     export class Visual implements IVisual {
-        private total           : THREE.Mesh;
-        private earthImg        : any;
-        private canvas          : HTMLElement;
-        private camera          : THREE.PerspectiveCamera;
-        private scene           : THREE.Scene;
-        private renderer        : THREE.WebGLRenderer;
-        private light           : THREE.DirectionalLight;
-        private window          : any;
-        private pivot           : THREE.Object3D;
-        private mouseDown       : boolean = false;
-        private mouseX          : any = 0;
-        private mouseY          : any = 0;
-        private textboxes       : THREE.Sprite[];
-        private prevCanvasX     : any;
-        private prevCanvasY     : any;
+        private dataView            : DataView;
+        private total               : THREE.Mesh;
+        private earthImg            : any;
+        private canvas              : HTMLElement;
+        private camera              : THREE.PerspectiveCamera;
+        private scene               : THREE.Scene;
+        private renderer            : THREE.WebGLRenderer;
+        private light               : THREE.DirectionalLight;
+        private window              : any;
+        private pivot               : THREE.Object3D;
+        private mouseDown           : boolean = false;
+        private mouseX              : any = 0;
+        private mouseY              : any = 0;
+        private textboxes           : THREE.Sprite[];
+        private prevCanvasX         : any;
+        private prevCanvasY         : any;
 
         constructor(options: VisualConstructorOptions) {
             // instantiate array of textboxes
@@ -63,6 +65,42 @@ module powerbi.extensibility.visual {
             document.addEventListener(MOUSEDOWN, this.onDocumentMouseDown, false);
             document.addEventListener(MOUSEMOVE, this.onDocumentMouseMove, false);
             this.window.addEventListener(RESIZE, this.onWindowResize, false);
+        }
+
+        public enumerateObjectInstances(options: EnumerateVisualObjectInstancesOptions): VisualObjectInstanceEnumeration {
+            debugger;
+            let objectName: string = options.objectName;
+            let objectEnumeration: VisualObjectInstance[] = [];
+            let dataView = this.dataView;
+        
+            switch( objectName ) {
+                case 'lighting':
+                    objectEnumeration.push({
+                        objectName: objectName,
+                        properties: {
+                            lightingColor: this.getFill(dataView, 'lightingColor'),
+                            barColors: this.getFill(dataView, 'barColors')
+                        },
+                        selector: null
+                    });
+                    break;
+            };
+            return objectEnumeration;
+        }
+
+        public getFill(dataView: DataView, key : any): Fill {
+            if (dataView) {
+                var objects = dataView.metadata.objects;
+                if (objects) {
+                    var general = objects['lighting'];
+                    if (general) {
+                        var fill = <Fill>general[key];
+                        if (fill)
+                            return fill;
+                    }
+                }
+            }
+            return { solid: { color: 'red' } };
         }
 
         onWindowResize = (event : any) => {
@@ -143,11 +181,17 @@ module powerbi.extensibility.visual {
             let long : any[] = options.dataViews[0].categorical.categories[1].values as any[]; // Longitude array
             let pop : any[] = options.dataViews[0].categorical.categories[2].values as any[]; // Population array
             let name : any[] = options.dataViews[0].categorical.categories[3].values as any[]; // Name array
-            
+            debugger;
             // the geometry that will contain all of our cubes
             let mergedGeom = new this.window.THREE.Geometry();
             // material to use for each of our elements
-            let cubeMat = new this.window.THREE.MeshLambertMaterial( {color: 0x000000, opacity: 0.6, emissive: 0xffffff });
+            //let cubeMat = new this.window.THREE.MeshLambertMaterial( {color: 0x000000, opacity: 0.6, emissive: 0xffffff });
+            let cubeMat = new this.window.THREE.MeshBasicMaterial( {color: 0x000000 });
+            if (this.dataView.metadata.objects) {
+                cubeMat.color.set(this.getFill(this.dataView, 'barColors').solid.color);
+                //cubeMat.emissive.set(this.getFill(this.dataView, 'barColors').solid.color);
+            }
+            console.log(this.getFill(this.dataView, 'barColors').solid.color);
             // find indices of top 5 numbers
             let indices = this.findIndicesOfMax(pop, 10);
 
@@ -173,7 +217,9 @@ module powerbi.extensibility.visual {
                     this.scene.add(sprite);
                     this.textboxes.push(sprite);
                 }
-                mergedGeom.merge(cubeBody.geometry, cubeBody.matrix);
+                cubeBody.geometry.computeFaceNormals();
+                cubeBody.geometry.computeVertexNormals();
+                mergedGeom.merge(cubeBody.geometry, cubeBody.matrix, i);
             }
             // create a new mesh, containing all the other meshes.
             this.total = new this.window.THREE.Mesh(mergedGeom, cubeMat);
@@ -212,6 +258,9 @@ module powerbi.extensibility.visual {
         private render() {
             this.camera.lookAt(new this.window.THREE.Vector3(0, 0, 0));
             this.light.lookAt(new this.window.THREE.Vector3(0, 0, 0));
+            if (this.dataView.metadata.objects) {
+                this.light.color.set(this.getFill(this.dataView, 'lightingColor').solid.color);
+            }
             requestAnimationFrame(() => this.render());
             this.renderer.render(this.scene, this.camera);
         }
@@ -219,7 +268,8 @@ module powerbi.extensibility.visual {
         public update(options: VisualUpdateOptions) {
             // Don't display anything but globe until data buckets are filled
             // Cleanup the screen if data buckets are deleted
-            if (options.dataViews[0].categorical.categories.length === DATABUCKETS) {
+            this.dataView = options.dataViews[0];
+            if (this.dataView.categorical.categories.length === DATABUCKETS) {
                 if (this.total != undefined) {
                     this.total.geometry.dispose();
                     this.total.material.dispose();

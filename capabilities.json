@@ -77,6 +77,32 @@
     ],
     "objects": 
     {
-        
+        "lighting": {
+            "displayName": "Colors",
+            "properties": {
+                "lightingColor": {
+                    "displayName": "Global Lighting",
+                    "description": "The background lighting of the scene.",
+                    "type": { 
+                        "fill": { 
+                            "solid": { 
+                                "color": true
+                                }
+                            }
+                    }
+                },
+                "barColors": {
+                    "displayName": "Globe bar colors",
+                    "description": "Color of the bars on the globe.",
+                    "type": {
+                        "fill": {
+                            "solid": {
+                                "color": true
+                            }
+                        }
+                    }
+                }
+            }
+        }
     }
 }

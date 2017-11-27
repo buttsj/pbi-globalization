@@ -7,6 +7,10 @@ Give the visualization a latitude + longitude coordinate, data value, and locati
 
 ![Image of Visualization](https://github.com/buttsj/pbi-globalization/blob/master/assets/newglobe_img.png)
 
+![Image of Decorated Visual 1](https://github.com/buttsj/pbi-globalization/blob/master/assets/decoration1.png)
+
+![Image of Decorated Visual 2](https://github.com/buttsj/pbi-globalization/blob/master/assets/decoration2.png)
+
 ## Installing this Visualization
 
 Navigate to the /dist/ folder and import the .pbiviz file into your PBI Desktop/Web App report.
@@ -34,9 +38,13 @@ Jack Butts [[Github]](https://github.com/buttsj)
 * v1.3
     * Background is available to be set in the properties now
     * Can toggle off Title of visual now
+* v1.4
+    * Set the global lighting color in properties
+    * Set the global databar color in properties
 * Possible future features:
     * Allow click filtering on data bars
     * Let user choose how many tooltips to show on screen
+    * Make each databar unique color (may be impossible)
 
 ***
 ###### Thanks

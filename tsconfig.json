@@ -7,7 +7,7 @@
     "sourceMap": true,
     "out": "./.tmp/build/visual.js",
     "lib": [ "es2015", "dom" ],
-    "noImplicitAny": true
+    "noImplicitAny": false
   },
   "files": [
     ".api/v1.8.0/PowerBI-visuals.d.ts",
