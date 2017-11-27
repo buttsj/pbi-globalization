@@ -7,7 +7,7 @@ Give the visualization a latitude + longitude coordinate, data value, and locati
 
 ![Image of Visualization](https://github.com/buttsj/pbi-globalization/blob/master/assets/newglobe_img.png)
 
-![Image of Decorated Visual 1](https://github.com/buttsj/pbi-globalization/blob/master/assets/decoration1_small.png) ![Image of Decorated Visual 2](https://github.com/buttsj/pbi-globalization/blob/master/assets/decoration2_small.png)
+![Image of Decorated Visual 1](https://github.com/buttsj/pbi-globalization/blob/master/assets/decoration1_small.png) ![Image of Decorated Visual 2](https://github.com/buttsj/pbi-globalization/blob/master/assets/decoration2_small.png) ![Image of Decorated Visual 2](https://github.com/buttsj/pbi-globalization/blob/master/assets/decoration3_small.png) ![Image of Decorated Visual 2](https://github.com/buttsj/pbi-globalization/blob/master/assets/decoration4_small.png)
 
 ## Installing this Visualization
 
