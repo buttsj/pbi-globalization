@@ -10,9 +10,17 @@ Give the visualization a latitude + longitude coordinate, data value, and locati
 ![Image of Decorated Visual 1](https://github.com/buttsj/pbi-globalization/blob/master/assets/decoration1_small.png) ![Image of Decorated Visual 2](https://github.com/buttsj/pbi-globalization/blob/master/assets/decoration2_small.png) ![Image of Decorated Visual 2](https://github.com/buttsj/pbi-globalization/blob/master/assets/decoration3_small.png) ![Image of Decorated Visual 2](https://github.com/buttsj/pbi-globalization/blob/master/assets/decoration4_small.png)
 
 ## Installing this Visualization
+#### Option 1 - GitHub
+Navigate to the /dist/ folder and download the .pbiviz file
 
-Navigate to the /dist/ folder and import the .pbiviz file into your PBI Desktop/Web App report.
+#### Option 2 - Microsoft AppSource Store
+Link to AppSource page coming soon!
 
+![Image of Logo](https://github.com/buttsj/pbi-globalization/blob/master/assets/globe_databars_logo.png)
+
+
+#### Installing in Power Bi Desktop/Web App
+In the list of visuals, click the ellipsis :speech_balloon: and import the .pbiviz file into your report.
 ![Image of Icon](https://github.com/buttsj/pbi-globalization/blob/master/assets/globe_icon.PNG)
 
 ## Contributors
