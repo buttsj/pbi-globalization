@@ -20,8 +20,10 @@ Link to AppSource page coming soon!
 
 
 #### Installing in Power Bi Desktop/Web App
-In the list of visuals, click the ellipsis :speech_balloon: and import the .pbiviz file into your report.
+
 ![Image of Icon](https://github.com/buttsj/pbi-globalization/blob/master/assets/globe_icon.PNG)
+
+In the list of visuals, click the ellipsis :speech_balloon: and import the .pbiviz file into your report.
 
 ## Contributors
 
