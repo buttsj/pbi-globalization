@@ -78,7 +78,7 @@
     "objects": 
     {
         "lighting": {
-            "displayName": "Colors",
+            "displayName": "Globe",
             "properties": {
                 "lightingColor": {
                     "displayName": "Global Lighting",

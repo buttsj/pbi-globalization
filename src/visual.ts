@@ -28,7 +28,6 @@ module powerbi.extensibility.visual {
     import DataViewObjects = powerbi.extensibility.utils.dataview.DataViewObject;
     export class Visual implements IVisual {
 
-        private maxToolTips         : number = 10;
         private dataView            : DataView;
         private total               : THREE.Mesh;
         private earthImg            : any;
@@ -70,7 +69,6 @@ module powerbi.extensibility.visual {
         }
 
         public enumerateObjectInstances(options: EnumerateVisualObjectInstancesOptions): VisualObjectInstanceEnumeration {
-            debugger;
             let objectName: string = options.objectName;
             let objectEnumeration: VisualObjectInstance[] = [];
             let dataView = this.dataView;
@@ -200,7 +198,6 @@ module powerbi.extensibility.visual {
             let long : any[] = options.dataViews[0].categorical.categories[1].values as any[]; // Longitude array
             let pop : any[] = options.dataViews[0].categorical.categories[2].values as any[]; // Population array
             let name : any[] = options.dataViews[0].categorical.categories[3].values as any[]; // Name array
-            debugger;
             // the geometry that will contain all of our cubes
             let mergedGeom = new this.window.THREE.Geometry();
             // material to use for each of our elements
