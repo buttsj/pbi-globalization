@@ -27,6 +27,8 @@
 module powerbi.extensibility.visual {
     import DataViewObjects = powerbi.extensibility.utils.dataview.DataViewObject;
     export class Visual implements IVisual {
+
+        private maxToolTips         : number = 10;
         private dataView            : DataView;
         private total               : THREE.Mesh;
         private earthImg            : any;
@@ -79,13 +81,30 @@ module powerbi.extensibility.visual {
                         objectName: objectName,
                         properties: {
                             lightingColor: this.getFill(dataView, 'lightingColor'),
-                            barColors: this.getFill(dataView, 'barColors')
+                            barColors: this.getFill(dataView, 'barColors'),
+                            tooltips: this.getValue(dataView, 'tooltips') 
                         },
                         selector: null
                     });
                     break;
             };
             return objectEnumeration;
+        }
+
+        public getValue(dataView: DataView, key: any) {
+            if (dataView) {
+                var objects = dataView.metadata.objects;
+                if (objects) {
+                    var general = objects['lighting'];
+                    if(general) {
+                        var val = general[key];
+                        if (val) {
+                            return val;
+                        }
+                    }
+                }
+            }
+            return 10;
         }
 
         public getFill(dataView: DataView, key : any): Fill {
@@ -185,15 +204,12 @@ module powerbi.extensibility.visual {
             // the geometry that will contain all of our cubes
             let mergedGeom = new this.window.THREE.Geometry();
             // material to use for each of our elements
-            //let cubeMat = new this.window.THREE.MeshLambertMaterial( {color: 0x000000, opacity: 0.6, emissive: 0xffffff });
             let cubeMat = new this.window.THREE.MeshBasicMaterial( {color: 0x000000 });
             if (this.dataView.metadata.objects) {
                 cubeMat.color.set(this.getFill(this.dataView, 'barColors').solid.color);
-                //cubeMat.emissive.set(this.getFill(this.dataView, 'barColors').solid.color);
             }
-            console.log(this.getFill(this.dataView, 'barColors').solid.color);
-            // find indices of top 5 numbers
-            let indices = this.findIndicesOfMax(pop, 10);
+            // find indices of top X numbers
+            let indices = this.findIndicesOfMax(pop, this.getValue(this.dataView, 'tooltips'));
 
             for (let i = 0; i < lat.length; i++) {
                 // calculate the position where we need to start the cube

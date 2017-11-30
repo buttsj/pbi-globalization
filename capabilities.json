@@ -101,6 +101,13 @@
                             }
                         }
                     }
+                },
+                "tooltips": {
+                    "displayName": "Max # of tool tips",
+                    "description": "Maximum allowed tool tips on screen.",
+                    "type": {
+                        "numeric": true
+                    }
                 }
             }
         }

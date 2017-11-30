@@ -49,6 +49,9 @@ Jack Butts [[Github]](https://github.com/buttsj)
 * v1.4
     * Set the global lighting color in properties
     * Set the global databar color in properties
+* v1.5
+    * Set the number of visible tool tips on screen in properties
+    * Removed debugging console logs
 * Possible future features:
     * Allow click filtering on data bars
     * Let user choose how many tooltips to show on screen
