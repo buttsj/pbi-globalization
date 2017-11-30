@@ -54,7 +54,6 @@ Jack Butts [[Github]](https://github.com/buttsj)
     * Removed debugging console logs
 * Possible future features:
     * Allow click filtering on data bars
-    * Let user choose how many tooltips to show on screen
     * Make each databar unique color (may be impossible)
 
 ***
