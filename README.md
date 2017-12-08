@@ -14,9 +14,9 @@ Give the visualization a latitude + longitude coordinate, data value, and locati
 Navigate to the /dist/ folder and download the .pbiviz file
 
 #### Option 2 - Microsoft AppSource Store
-Link to AppSource page coming soon!
+https://appsource.microsoft.com/en-us/product/power-bi-visuals/WA104381344
 
-![Image of Logo](https://github.com/buttsj/pbi-globalization/blob/master/assets/globe_databars_logo.png)
+![Image of Logo](https://github.com/buttsj/pbi-globalization/blob/master/assets/appsource_page.png)
 
 
 #### Installing in Power Bi Desktop/Web App
