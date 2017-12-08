@@ -52,6 +52,8 @@ Jack Butts [[Github]](https://github.com/buttsj)
 * v1.5
     * Set the number of visible tool tips on screen in properties
     * Removed debugging console logs
+* v1.6
+    * Cleaning/refactoring code
 * Possible future features:
     * Allow click filtering on data bars
     * Make each databar unique color (may be impossible)

@@ -42,8 +42,6 @@ module powerbi.extensibility.visual {
         private mouseX              : any = 0;
         private mouseY              : any = 0;
         private textboxes           : THREE.Sprite[];
-        private prevCanvasX         : any;
-        private prevCanvasY         : any;
 
         constructor(options: VisualConstructorOptions) {
             // instantiate array of textboxes
@@ -51,7 +49,6 @@ module powerbi.extensibility.visual {
             this.window = window;
             // create the scene
             this.scene = new this.window.THREE.Scene({ alpha: true });
-            //this.scene.background = new this.window.THREE.Color(0x000000);
             // make the camera & earth & lights
             this.createCamera();
             this.createEarth();
@@ -279,8 +276,6 @@ module powerbi.extensibility.visual {
         }
 
         public update(options: VisualUpdateOptions) {
-            // Don't display anything but globe until data buckets are filled
-            // Cleanup the screen if data buckets are deleted
             this.dataView = options.dataViews[0];
             if (this.dataView.categorical.categories.length === DATABUCKETS) {
                 if (this.total != undefined) {

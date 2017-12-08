@@ -78,10 +78,10 @@
     "objects": 
     {
         "lighting": {
-            "displayName": "Globe",
+            "displayName": "Globe Settings",
             "properties": {
                 "lightingColor": {
-                    "displayName": "Global Lighting",
+                    "displayName": "Visual Lighting",
                     "description": "The background lighting of the scene.",
                     "type": { 
                         "fill": { 
@@ -92,7 +92,7 @@
                     }
                 },
                 "barColors": {
-                    "displayName": "Globe bar colors",
+                    "displayName": "Bar colors",
                     "description": "Color of the bars on the globe.",
                     "type": {
                         "fill": {
@@ -103,7 +103,7 @@
                     }
                 },
                 "tooltips": {
-                    "displayName": "Max # of tool tips",
+                    "displayName": "Num of tool tips",
                     "description": "Maximum allowed tool tips on screen.",
                     "type": {
                         "numeric": true
