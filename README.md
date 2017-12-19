@@ -1,4 +1,5 @@
 # pbi-globalization
+[![Build Status](https://travis-ci.org/buttsj/pbi-globalization.svg?branch=master)](https://travis-ci.org/buttsj/pbi-globalization)
 > A Power BI visualization to show data through Latitudes and Longitudes :earth_americas:  :bar_chart:
 
 ## How it works
