@@ -1,5 +1,6 @@
 # pbi-globalization
-[![Build Status](https://travis-ci.org/buttsj/pbi-globalization.svg?branch=master)](https://travis-ci.org/buttsj/pbi-globalization)
+[![Build Status](https://travis-ci.org/buttsj/pbi-globalization.svg?branch=master)](https://travis-ci.org/buttsj/pbi-globalization) ![Certified](https://appsource.microsoft.com/images/pdp_pbiBadge.svg)
+
 > A Power BI visualization to show data through Latitudes and Longitudes :earth_americas:  :bar_chart:
 
 ## How it works
@@ -39,7 +40,7 @@ Jack Butts [[Github]](https://github.com/buttsj)
 * v1.1
     * Globe no longer auto-rotates
     * Globe can be rotated with mouse click and drag
-    * Data is now scaled down by the median of the data set (easier to see all data bars on globe) 
+    * Data is now scaled down by the median of the data set (easier to see all data bars on globe)
 * v1.2
     * Data is now scaled down by the amount of the value, for better visibility
     * New required data bucket for a name of the Lat/Long location
