@@ -1,5 +1,5 @@
 # pbi-globalization
-[![Build Status](https://travis-ci.org/buttsj/pbi-globalization.svg?branch=master)](https://travis-ci.org/buttsj/pbi-globalization) ![Certified](https://appsource.microsoft.com/images/pdp_pbiBadge.svg)
+[![Build Status](https://travis-ci.org/buttsj/pbi-globalization.svg?branch=master)](https://travis-ci.org/buttsj/pbi-globalization) [![Certified](https://appsource.microsoft.com/images/pdp_pbiBadge.svg)](https://docs.microsoft.com/en-us/power-bi/developer/power-bi-custom-visuals-certified)
 
 > A Power BI visualization to show data through Latitudes and Longitudes :earth_americas:  :bar_chart:
 
