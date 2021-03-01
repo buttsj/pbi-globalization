@@ -5,6 +5,6 @@
     "license": "MIT",
     "dependencies": {
         "powerbi-visuals-utils-dataviewutils": "1.2.0",
-        "three": "^0.88.0"
+        "three": "^0.125.0"
     }
 }
